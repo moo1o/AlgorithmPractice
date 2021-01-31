@@ -1,65 +1,87 @@
-//
-//  1107.cpp
-//  Baekjoon
-//
-//  Created by 김무열 on 2017. 8. 31..
-//  Copyright © 2017년 김무열. All rights reserved.
-//
+#include <cstdio>
 
-#include <iostream>
-#include <vector>
+int N, M, ans;
+int btn[10];
 
-using namespace std;
+int _abs(int x) {
+	return x > 0 ? x : -x;
+}
 
-int main(void){
-    int n, m, tmp, ans = 0;
-    int cnt = 0;
-    
-    scanf("%d %d", &n, &m);
-    vector<int> elementN(0);
-    bool num[10] = {true};
-    for(int i=0 ; i<m ; i++){
-        scanf("%d", &tmp);
-        num[tmp] = false;
-    }
-    tmp = n;
-    while(true){
-        if(n < 10){
-            elementN.push_back(n);
-            break;
-        }
-        else{
-            elementN.push_back(n%10);
-            n /= 10;
-        }
-    }
-    n = tmp;
-    cnt = (int)elementN.size();
-    ans = (unsigned int)(n - 100);
-    tmp = 0;
-    for(int i=0 ; i<elementN.size() ; i++){
-        if(num[elementN[i]] == true)
-            tmp = tmp+(elementN[i]*(10^i));
-        else{
-            int j = 1;
-            while(true){
-                if(num[elementN[i]+j] == true){
-                    tmp = tmp+(elementN[i]*(10^i));
-                    break;
-                }
-                if(num[elementN[i]-j] == true){
-                    tmp = tmp+(elementN[i]*(10^i));
-                    break;
-                }
-                j++;
-            }
-        }
-    }
-    printf("%d\n", tmp);
-    cnt += (unsigned int)(n - tmp);
-    if(ans > cnt)
-        ans = cnt;
-    
-    printf("%d\n", ans);
-    return 0;
+int check(int n) {
+	if (n == 0) {
+		if (btn[0])
+			return -1;
+		else
+			return 1;
+	}
+	int cnt = 0;
+	while (n > 0) {
+		int x = n % 10;
+		if (btn[x] == 1)
+			return -1;
+		n /= 10;
+		cnt++;
+	} 
+	return cnt;
+}
+
+void func(int N) {
+	int cnt = check(N);
+	if (cnt != -1) {
+		if (ans > cnt)
+			ans = cnt;
+	}
+	else {
+		/*int i = 1;
+		int t1 = -1;
+		int t2 = -1;
+		for (; t1 == -1 && t2 == -1; i++) {
+			if((N - i)>=0)
+				t1 = check(N - i);
+			if((N+i)<=1000000)
+				t2 = check(N + i);
+			if (t1 > ans && t2 > ans)
+				return;
+		}
+		if (t1 != -1) {
+			t1 += (i - 1);
+			cnt = t1;
+		}
+		if (t2 != -1) {
+			t2 += (i - 1);
+			cnt = t2;
+		}
+		
+		if (ans > cnt)
+			ans = cnt;
+		*/
+
+		for (int i = 0; i <= 1000000; i++) {
+			int c = i;
+			int len = check(c);
+			if (len > 0) {
+				int press = _abs(c - N);
+				if (ans > len + press) {
+					ans = len + press;
+				}
+			}
+		}
+	}
+	
+}
+
+int main(void) {
+	scanf("%d%d", &N, &M);
+	
+	for (int i = 0; i < M; i++) {
+		int in;
+		scanf("%d", &in);
+		btn[in] = 1;
+	}
+
+	ans = _abs(N - 100);
+	if(ans != 0)
+		func(N);
+	printf("%d\n", ans);
+	return 0;
 }

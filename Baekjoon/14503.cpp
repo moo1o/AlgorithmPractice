@@ -1,126 +1,99 @@
-//
-//  14503.cpp
-//  Baekjoon
-//
-//  Created by 김무열 on 2017. 10. 3..
-//  Copyright © 2017년 김무열. All rights reserved.
-//
-
 #include <iostream>
-#include <vector>
-
+#define MAX 50
 using namespace std;
 
-//0:북 1:동 2:남 3:서
-/*
-1.현재 위치를 청소한다.
-2.현재 위치에서 현재 방향을 기준으로 왼쪽방향부터 차례대로 탐색을 진행한다.
-   1. 왼쪽 방향에 아직 청소하지 않은 공간이 존재한다면, 그 방향으로 회전한 다음 한 칸을 전진하고 1번부터 진행한다.
-   2. 왼쪽 방향에 청소할 방향이 없다면, 그 방향으로 회전하고 2번으로 돌아간다.
-   3. 네 방향 모두 청소가 이미 되어있거나 벽인 경우에는, 바라보는 방향을 유지한 채로 한 칸 후진을 하고 2번으로 돌아간다.
-   4. 네 방향 모두 청소가 이미 되어있거나 벽이면서, 뒤쪽 방향이 벽이라 후진도 할 수 없는 경우에는 작동을 멈춘다. */
-int map[51][51];
-int n, m;
-int score;
-int tmp;
+enum {
+	NORTH = 0,
+	WEST =1,
+	SOUTH = 2,
+	EAST = 3
+};
 
-void clean(int r, int c){
-    if(map[r][c] == 0){
-        map[r][c] = 1;
-        score += 1;
-    }
+int N, M;
+int map[MAX][MAX], ans;
+int visit[MAX][MAX];
+int dy[] = { -1, 0, 1, 0 };
+int dx[] = { 0, -1, 0, 1 };
+
+void print(int y, int x, int d) {
+	int loc[MAX][MAX] = { 0 };
+	loc[y][x] = d+1;
+	for (int i = 0; i <= N; i++) {
+		for (int j = 0; j <= M; j++) {
+			printf("%2d", visit[i][j]);
+		}
+		printf(" ");
+		for (int j = 0; j <= M; j++) {
+			printf("%2d", loc[i][j]);
+		}
+		printf("\n");
+	}
+	printf("\n");
 }
 
-void find(int r, int c, int d, int cnt){
-    clean(r, c);
-    if(cnt == 4){
-        switch(d){
-            case 0:
-                if(map[r+1][c] == 1){
-                    find(r+1, c, d, 0);
-                }
-                break;
-            case 1:
-                if(map[r][c-1] == 1){
-                    find(r, c-1, d, 0);
-                }
-                break;
-            case 2:
-                if(map[r-1][c] == 1){
-                    find(r-1, c, d, 0);
-                }
-                break;
-            case 3:
-                if(map[r][c+1] == 1){
-                    find(r, c+1, d, 0);
-                }
-                break;
-        }
-        return;
-    }
-    switch(d){
-        case 0:
-            if(map[r][c-1] == 0){
-                find(r, c-1, 3, 0);
-            }
-            else
-                find(r, c, 3, cnt+1);
-            break;
-            
-        case 1:
-            if(map[r-1][c] == 0){
-                find(r-1, c, 0, 0);
-            }
-            else
-                find(r, c, 0, cnt+1);
-            break;
-            
-        case 2:
-            if(map[r][c+1] == 0){
-                find(r, c+1, 1, 0);
-            }
-            else
-                find(r, c, 1, cnt+1);
-            break;
-            
-        case 3:
-            if(map[r+1][c] == 0){
-                find(r+1, c, 2, 0);
-            }
-            else
-                find(r, c, 2, cnt+1);
-            break;
-    }
-    return;
+//Ž�� : ����(0) -> ����(1), ����(1) -> ����(2), ����(2)->����(3), ����(3)->����(0)
+//���� : ����(0) <-> ����(2), ����(1) <-> ����(3), 
+void dfs(int y, int x, int d, int cnt) {
+	//print(y, x, d);
+	int nd = d;
+	for (int i = 0; i < 4; i++) {
+		nd = (nd + 1) % 4;
+		int ny = y + dy[nd];
+		int nx = x + dx[nd];
+		if (visit[ny][nx] == 0 && map[ny][nx] == 0) {
+			visit[ny][nx] = 1;
+			dfs(ny, nx, nd, cnt + 1);
+			return;
+		}
+	}
+	
+		
+	if (nd == d) {
+		int ny = y - dy[nd];
+		int nx = x - dx[nd];
+		if (map[ny][nx] == 0) {
+			if (visit[ny][nx] == 0) {
+				visit[ny][nx] = 1;
+				dfs(ny, nx, nd, cnt + 1);
+			}
+			else
+				dfs(ny, nx, nd, cnt);
+		}
+		else {
+			if (ans < cnt)
+				ans = cnt;
+			return;
+		}
+	}
+	return;
 }
 
-int main(void){
-    for(int i=0; i<51; i++){
-        for(int j=0 ; j<51 ; j++){
-            map[i][j] = 2;
-        }
-    }
-    
-    cin >> n >> m;
-    
-    int r, c, d;
-    
-    cin >> r >> c >> d;
-    
-    for(int i=0; i<n; i++){
-        for(int j=0 ; j<m ; j++){
-            cin >> map[i][j];
-        }
-    }
-    for(int i=n; i<51; i++){
-        for(int j=m ; j<51 ; j++){
-            map[i][j] = 2;
-        }
-    }
-    
-    find(r, c, d, 0);
-    cout << score << endl;
-    
-    
-    return 0;
+
+int main(void) {
+	scanf("%d %d", &N, &M);
+	int y, x, dir;
+	scanf("%d %d %d", &y, &x, &dir);
+	y++;
+	x++;
+	memset(map, 1, sizeof(map));
+	for (int i = 1; i <= N; i++) {
+		for (int j = 1; j <= M; j++) {
+			scanf("%d", &map[i][j]);
+		}
+	}
+	//�ϼ����� ������ �����
+	switch (dir) {
+	case 1: //���� -> 3
+		dir = 3;
+		break;
+	case 3: //���� -> 1
+		dir = 1;
+		break;
+	}
+	visit[y][x] = 1;
+	dfs(y, x, dir, 1);
+
+	printf("%d\n", ans);
+
+	return 0;
 }

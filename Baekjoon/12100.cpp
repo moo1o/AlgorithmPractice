@@ -1,127 +1,169 @@
-//
-//  12100.cpp
-//  Baekjoon
-//
-//  Created by ÍπÄÎ¨¥Ïó¥ on 2017. 10. 25..
-//  Copyright ¬© 2017ÎÖÑ ÍπÄÎ¨¥Ïó¥. All rights reserved.
-//
+#include <cstdio>
+#define MAX 22
+int N, ans;
+int map[MAX][MAX];
 
-#include <iostream>
-#include <vector>
-#include <queue>
-#include <algorithm>
+enum {
+	first,
+	up,
+	down,
+	left,
+	right
+};
 
-using namespace std;
-int ans;
+void func(int cnt, int _map[MAX][MAX], int type) {
+	if (cnt == 5) {
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				if (_map[i][j] > ans) {
+					ans = _map[i][j];					
+				
+					/*for (int k = 0; k < N; k++) {
+						for (int l = 0; l < N; l++) {
+							printf("%2d", _map[k][l]);
+						}
+						printf("\n");
+					}
+					printf("\n");*/
+				}
 
-void findans(vector<vector<int>> board){
-    for(int i=0 ; i<board.size() ; i++){
-        for(int j=0 ; j<board.size() ; j++){
-            if(board[i][j] > ans){
-                ans = board[i][j];
-            }
-        }
-    }
+			}
+		}
+		return;
+	}
+		
+	//¿ß
+	if (type != up) {
+		int tmp[MAX][MAX] = { 0 };
+		for (int j = 0; j < N; j++) {
+			int index = 0;
+			for (int i = 0; i < N; i++) {
+				if (_map[i][j] != 0) {
+					if (tmp[index][j] == 0) {
+						tmp[index][j] = _map[i][j];
+					}
+					else if (tmp[index][j] == _map[i][j]) {
+						tmp[index][j] += _map[i][j];
+						index++;
+					}
+					else if (tmp[index][j] != _map[i][j]) {
+						tmp[++index][j] = _map[i][j];
+					}
+				}
+			}
+		}
+		/*for (int k = 0; k < N; k++) {
+			for (int l = 0; l < N; l++) {
+				printf("%2d", tmp[k][l]);
+			}
+			printf("\n");
+		}
+		printf("\n");*/
+		func(cnt + 1, tmp, up);
+	}
+	
+	//æ∆∑°
+	if (type != down) {
+		int tmp[MAX][MAX] = { 0 };
+		for (int j = 0; j < N; j++) {
+			int index = N-1;
+			for (int i = N-1; i >= 0; i--) {
+				if (_map[i][j] != 0) {
+					if (tmp[index][j] == 0) {
+						tmp[index][j] = _map[i][j];
+					}
+					else if (tmp[index][j] == _map[i][j]) {
+						tmp[index][j] += _map[i][j];
+						index--;
+					}
+					else if (tmp[index][j] != _map[i][j]) {
+						tmp[--index][j] = _map[i][j];
+					}
+				}
+			}
+		}
+		/*for (int k = 0; k < N; k++) {
+			for (int l = 0; l < N; l++) {
+				printf("%2d", tmp[k][l]);
+			}
+			printf("\n");
+		}
+		printf("\n");*/
+		func(cnt + 1, tmp, down);
+	}
+	
+	//¡¬
+	if (type != left) {
+		int tmp[MAX][MAX] = { 0 };
+		for (int i = 0; i < N; i++) {
+			int index = 0;
+			for (int j = 0; j < N; j++) {
+				if (_map[i][j] != 0) {
+					if (tmp[i][index] == 0) {
+						tmp[i][index] = _map[i][j];
+					}
+					else if (tmp[i][index] == _map[i][j]) {
+						tmp[i][index] += _map[i][j];
+						index++;
+					}
+					else if (tmp[i][index] != _map[i][j]) {
+						tmp[i][++index] = _map[i][j];
+					}
+				}
+			}
+		}
+		/*for (int k = 0; k < N; k++) {
+			for (int l = 0; l < N; l++) {
+				printf("%2d", tmp[k][l]);
+			}
+			printf("\n");
+		}
+		printf("\n");*/
+		func(cnt + 1, tmp, left);
+	}
+
+	//øÏ
+	if (type != right) {
+		int tmp[MAX][MAX] = { 0 };
+		for (int i = 0; i < N; i++) {
+			int index = N-1;
+			for (int j = N-1; j >= 0; j--) {
+				if (_map[i][j] != 0) {
+					if (tmp[i][index] == 0) {
+						tmp[i][index] = _map[i][j];
+					}
+					else if (tmp[i][index] == _map[i][j]) {
+						tmp[i][index] += _map[i][j];
+						index--;
+					}
+					else if (tmp[i][index] != _map[i][j]) {
+						tmp[i][--index] = _map[i][j];
+					}
+				}
+			}
+		}
+		/*for (int k = 0; k < N; k++) {
+			for (int l = 0; l < N; l++) {
+				printf("%2d", tmp[k][l]);
+			}
+			printf("\n");
+		}
+		printf("\n");*/
+		func(cnt + 1, tmp, right);
+	}
 }
 
-void func(vector<vector<int>> board, int cnt){
-    if(cnt == 6){
-        findans(board);
-        return;
-    }
-    vector<vector<int>> now = board;
-    
-    //ÏÉÅ
-    for(int j=0 ; j<board.size() ; j++){
-        for(int i=0 ; i<board.size() ; i+=2){
-            int t=i;
-            while(t-1 > -1 &&  now[t-1][j] == 0){
-                now[t-1][j] = now[t][j];
-                now[t][j] = 0;
-                t--;
-            }
-            if(i+1 < board.size() && now[i][j] == now[i+1][j]){
-                now[i][j] += now[i+1][j];
-                now[i+1][j] = 0;
-            }
-            
-        }
-    }
-    func(now, cnt+1);
-    
-    //Ìïò
-    now = board;
-    for(int j=0 ; j<board.size() ; j++){
-        for(int i=(int)board.size()-1 ; i>-1 ; i-=2){
-            int t=i;
-            while(t+1 < board.size() &&  now[t+1][j] == 0){
-                now[t+1][j] = now[t][j];
-                now[t][j] = 0;
-                t++;
-            }
-            if(i-1 > -1 && now[i][j] == now[i-1][j]){
-                now[i][j] += now[i-1][j];
-                now[i-1][j] = 0;
-            }
-           
-        }
-    }
-    func(now, cnt+1);
-    
-    //Ï¢å
-    now = board;
-    for(int i=0 ; i<board.size() ; i++){
-        for(int j=0 ; j<board.size() ; j+=2){
-            int t=j;
-            while(t-1 > -1 &&  now[i][t-1] == 0){
-                now[i][t-1] = now[i][t];
-                now[i][t] = 0;
-                t--;
-            }
-            if(j+1 < board.size() && now[i][j] == now[i][j+1]){
-                now[i][j] += now[i][j+1];
-                now[i][j+1] = 0;
-            }
-            
-        }
-    }
-    func(now, cnt+1);
-    
-    //Ïö∞
-    now = board;
-    for(int i=0 ; i<board.size() ; i++){
-        for(int j=(int)board.size()-1 ; j>-1 ; j-=2){
-            int t=j;
-            while(t+1 < board.size() &&  now[i][t+1] == 0){
-                now[i][t+1] = now[i][t];
-                now[i][t] = 0;
-                t++;
-            }
-            if(j-1 > -1 && now[i][j] == now[i][j-1]){
-                now[i][j] += now[i][j-1];
-                now[i][j-1] = 0;
-            }
-            
-        }
-    }
-    func(now, cnt+1);
-    
-}
+int main(void) {
+	scanf("%d", &N);
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			scanf("%d", &map[i][j]);
+		}
+	}
 
-int main(void){
-    int n;
-    cin >> n;
-    vector <vector <int>> board(n, vector <int>(n));
-    
-    for(int i=0; i<n ; i++){
-        for(int j=0 ; j<n ; j++){
-            cin >> board[i][j];
-        }
-    }
-    
-    func(board, 1);
-    
-    cout << ans << endl;
-    
-    return 0;
+	func(0, map, first);
+
+	printf("%d\n", ans);
+
+	return 0;
 }
